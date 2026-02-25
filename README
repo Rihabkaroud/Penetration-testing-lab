@@ -121,6 +121,22 @@ set PASSWORD msfadmin
 run
 Result: Successful login detected.
 
+5.2 SMB Exploitation (Port 445)
+
+Port 445 was identified as open during the full TCP scan:
+nmap -p- 192.168.1.20
+The scan confirmed that the SMB service was running and accessible remotely.
+
+SMB Enumeration
+To examine the SMB service and check authentication behavior, the following command was used:
+smbclient -L 192.168.1.20
+
+Result:
+Anonymous login was successful.
+Shared resources were listed without requiring authentication credentials.
+
+Allowing anonymous access to SMB shares indicates weak authentication configuration. This exposes system resources to unauthorized users and increases the risk of information disclosure and further exploitation.
+
 6. Post-Exploitation
 
 After gaining access, the command:
