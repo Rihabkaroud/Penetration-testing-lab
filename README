@@ -16,7 +16,7 @@ Default Gateway: 192.168.1.1
 
 Network Configuration
 Both virtual machines were connected using VirtualBox Internal Network.
-Since the internal network does not provide a DHCP server, IP addresses were assigned manually using:
+Since the internal network does not provide a DHCP server, IP addresses were assigned manually using :
 sudo ifconfig eth0 <IP> netmask 255.255.255.0 broadcast 192.168.1.255
 
 Connectivity was verified using:
