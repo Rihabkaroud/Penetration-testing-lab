@@ -1,18 +1,18 @@
-Penetration Testing Learning Lab
-Kali Linux & Metasploitable 2
+#Penetration Testing Learning Lab
+##Kali Linux & Metasploitable 2
 
-1. Introduction
+###1. Introduction
 The objective of this lab was to understand how attackers identify, analyze, and exploit vulnerable network services, and to learn why those services are insecure.
 The target machine (Metasploitable 2) is intentionally vulnerable and used strictly for educational purposes in a controlled virtual environment.
 
-2. Lab Environment Setup
-2.1 Virtual Machines:
+###2. Lab Environment Setup
+####2.1 Virtual Machines:
 Attacker Machine: Kali Linux
 IP: 192.168.1.10
 Target Machine: Metasploitable 2
 IP: 192.168.1.20
 
-2.2 Network Configuration
+####2.2 Network Configuration
 Both virtual machines were connected using VirtualBox Internal Network.
 Since the internal network does not provide a DHCP server, IP addresses were assigned manually using :
 sudo ifconfig eth0 <IP> netmask 255.255.255.0 broadcast 192.168.1.255
@@ -23,7 +23,7 @@ ping 192.168.1.20
 IP configuration was confirmed with:
 ifconfig
 
-2.3 Issue Faced
+####2.3 Issue Faced
 VirtualBox internal networking does not provide a DHCP server, which caused the VMs to lose their IP configuration after reboot.
 
 Solution
@@ -36,15 +36,15 @@ netmask 255.255.255.0
 gateway 192.168.1.1
 broadcast 192.168.1.255
 
-3. Enumeration Phase
-3.1 Local Service Inspection (Target)
+###3. Enumeration Phase
+####3.1 Local Service Inspection (Target)
 
 On Metasploitable 2:
 
 netstat -tulpn
 This command identified services listening locally on the system.
 
-3.2 Remote Scanning (From Kali Linux)
+####3.2 Remote Scanning (From Kali Linux)
 
 Initial scans were performed using:
 
@@ -56,7 +56,7 @@ nmap -p- 192.168.1.20
 -sU → UDP scan
 -p- → Full TCP port scan
 
-3.3 Detailed Service Enumeration
+####3.3 Detailed Service Enumeration
 
 To perform an active scan with script execution:
 
@@ -68,7 +68,7 @@ Configurations
 Known vulnerability indicators
 This helps detect outdated services and misconfigurations.
 
-4. Vulnerability Detection
+###4. Vulnerability Detection
 
 Based on scan results, several high-risk services were identified:
 Port	Service	Vulnerability
@@ -79,8 +79,8 @@ Port	Service	Vulnerability
 
 These services expose the system to remote exploitation.
 
-5. Exploitation Phase
-5.1 Telnet Exploitation (Port 23)
+###5. Exploitation Phase
+####5.1 Telnet Exploitation (Port 23)
 
 Port 23 was confirmed open:
 nmap -p- 192.168.1.20
@@ -119,7 +119,7 @@ set PASSWORD msfadmin
 run
 Result: Successful login detected.
 
-5.2 SMB Exploitation (Port 445)
+####5.2 SMB Exploitation (Port 445)
 
 Port 445 was identified as open during the full TCP scan:
 nmap -p- 192.168.1.20
@@ -139,7 +139,7 @@ smbclient //192.168.1.20/tmp -N
 This command allowed access to the SMB shell without authentication.
 Anonymous access to shared directories is a serious misconfiguration. It allows unauthorized users to browse, upload, or download files, which can lead to data exposure, malware placement, or further system compromise.
 
-5.3 IRC Exploitation (Port 6667)
+####5.3 IRC Exploitation (Port 6667)
 
 Port 6667 was identified as open during the full TCP scan:
 nmap -p- 192.168.1.20
@@ -173,7 +173,7 @@ run
 Result:
 A command shell session was successfully opened on the target machine
 
-6. Post-Exploitation
+###6. Post-Exploitation
 
 After gaining access, the command:
 whoami
